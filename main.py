@@ -1,8 +1,9 @@
 import tkinter as tk
 from tkinter import filedialog
 from text_processing import split_document, extract_keyword_sections
-from summarization import summarize_sections, generate_recommendation
-from utils import save_report_to_file
+from summarization import summarize_sections, generate_recommendation, basic_summary, gpt_summary
+from utils import save_report_to_file, save_report_with_timestamp
+
 
 # Global variables to store processed data
 processed_chunks = None
@@ -81,20 +82,65 @@ def question_based_summarization(question):
     # Save the report with a filename based on the question
     save_report_to_file(report, f"{question.replace(' ', '_')}_report.pdf")
 
+def summarize_text():
+    """Summarizes the entire document with a word limit."""
+    input_text = text_display.get(1.0, tk.END).strip()
+    if input_text:
+        summary = basic_summary(input_text, max_length=150)  # Limit summary to ~150 words
+        result_display.delete(1.0, tk.END)
+        result_display.insert(tk.END, summary)
+
+def save_report(action):
+    """Saves the current report based on the action, either 'new' or 'append'."""
+    input_text = result_display.get(1.0, tk.END).strip()
+    if input_text:
+        if action == 'new':
+            # Save report with timestamp in a new file
+            save_report_with_timestamp(input_text, "Summary_Report")
+        elif action == 'append':
+            # Append the report to an existing file
+            save_report_with_timestamp(input_text, "project_report.txt", append=True)
+
+def summarize_text_with_gpt():
+    """Summarizes the entire document using GPT-4."""
+    input_text = text_display.get(1.0, tk.END).strip()
+    if input_text:
+        summary = gpt_summary(input_text, word_limit=150)  # Limit summary to 150 words
+        result_display.delete(1.0, tk.END)
+        result_display.insert(tk.END, summary)
+
+
 # Tkinter setup
 root = tk.Tk()
-root.title("Question-Based Summarization Tool")
+root.title("Journal Analysis Tool")
 root.geometry("800x600")
 
 # Create UI elements
 upload_button = tk.Button(root, text="Upload Text File", command=upload_file)
 upload_button.pack(pady=10)
 
+# Button for summarizing the entire text
+summarize_button = tk.Button(root, text="Summarize Text (150 words)", command=summarize_text)
+summarize_button.pack(pady=10)
+
+# Button for summarizing the entire text using GPT
+summarize_gpt_button = tk.Button(root, text="Summarize Text (GPT, 150 words)", command=summarize_text_with_gpt)
+summarize_gpt_button.pack(pady=10)
+
+
 # Buttons for predefined questions
 for question in questions_and_keywords:
     button = tk.Button(root, text=question, command=lambda q=question: question_based_summarization(q))
     button.pack(pady=5)
 
+# Buttons for saving the report
+save_new_button = tk.Button(root, text="Save Report to New File", command=lambda: save_report('new'))
+save_new_button.pack(pady=5)
+
+append_button = tk.Button(root, text="Append Report to Existing File", command=lambda: save_report('append'))
+append_button.pack(pady=5)
+
+# Text display and result display
 text_display = tk.Text(root, height=10, width=100)
 text_display.pack(pady=10)
 

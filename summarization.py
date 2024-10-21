@@ -1,9 +1,25 @@
 from transformers import pipeline, AutoTokenizer
+import openai
 
 # Initialize the summarizer and tokenizer with specific model and revision
 summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", revision="a4f8f3e")
 tokenizer = AutoTokenizer.from_pretrained("sshleifer/distilbart-cnn-12-6")
 qa_model = pipeline("question-answering", model="distilbert-base-cased-distilled-squad", revision="564e9b5")
+
+def gpt_summary(text, word_limit=150):
+    """Uses GPT-4 or GPT-3.5 to summarize text to a specific word limit."""
+    try:
+        # Send the text to OpenAI API
+        response = openai.Completion.create(
+            engine="gpt-4",  # Or use "gpt-3.5-turbo"
+            prompt=f"Summarize the following text in {word_limit} words:\n\n{text}",
+            max_tokens=word_limit * 4,  # Adjust tokens based on your word limit
+            temperature=0.7,
+        )
+        summary = response.choices[0].text.strip()
+        return summary
+    except Exception as e:
+        return f"Error generating summary: {e}"
 
 def summarize_sections(sections, max_tokens=1024):
     """Summarizes an array of text sections."""
@@ -26,3 +42,11 @@ def generate_recommendation(finding, question):
     """Generates recommendations based on findings and a question."""
     response = qa_model(question=question, context=finding)
     return response['answer']
+
+def basic_summary(text, max_length=150):
+    """Generates a basic summary of the given text, limited to a certain number of words."""
+    try:
+        summary = summarizer(text, max_length=max_length, min_length=50, do_sample=False)[0]['summary_text']
+        return summary
+    except Exception as e:
+        return f"Error summarizing text: {e}"
