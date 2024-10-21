@@ -1,25 +1,91 @@
 from transformers import pipeline, AutoTokenizer
-import openai
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
 
-openai.api_key = 'your-openai-api-key'
+load_dotenv(dotenv_path='.env.local')
+
+client = OpenAI(
+  api_key=os.environ['OPENAI_API_KEY'],  
+)
 
 # Initialize the summarizer and tokenizer with specific model and revision
 summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", revision="a4f8f3e")
 tokenizer = AutoTokenizer.from_pretrained("sshleifer/distilbart-cnn-12-6")
 qa_model = pipeline("question-answering", model="distilbert-base-cased-distilled-squad", revision="564e9b5")
 
+from openai import OpenAI
+import os
+
+# Initialize the OpenAI client
+client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+
 def gpt_summary(text, word_limit=150):
-    """Uses GPT-4 or GPT-3.5 to summarize text to a specific word limit."""
+    """Uses GPT-4 or GPT-3.5 to summarize text using the Chat API."""
     try:
-        # Send the text to OpenAI API
-        response = openai.Completion.create(
-            engine="gpt-4",  # Or use "gpt-3.5-turbo"
-            prompt=f"Summarize the following text in {word_limit} words:\n\n{text}",
+        # Send the request to the OpenAI Chat API
+        response = client.chat.completions.create(
+            model="gpt-4",  # Or use "gpt-3.5-turbo"
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that summarizes text."},
+                {"role": "user", "content": f"Please summarize the following text in {word_limit} words while keeping the first-person perspective intact:\n\n{text}"}
+            ],
             max_tokens=word_limit * 4,  # Adjust tokens based on your word limit
             temperature=0.7,
         )
-        summary = response.choices[0].text.strip()
+
+        # Access the summary from the response using the new Pydantic model
+        summary = response.choices[0].message.content.strip()
+
+        # Return the summary
         return summary
+
+    except Exception as e:
+        return f"Error generating summary: {e}"
+
+def gpt_summary(text, word_limit=150):
+    """Uses GPT-4 or GPT-3.5 to summarize text using the Chat API."""
+    try:
+        # Send the request to the OpenAI Chat API
+        response = client.chat.completions.create(
+            model="gpt-4",  # Or use "gpt-3.5-turbo"
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that summarizes text."},
+                {"role": "user", "content": f"Please summarize the following text in {word_limit} words while keeping the first-person perspective intact:\n\n{text}"}
+            ],
+            max_tokens=word_limit * 4,  # Adjust tokens based on your word limit
+            temperature=0.7,
+        )
+
+        # Access the summary from the response using the new Pydantic model
+        summary = response.choices[0].message.content.strip()
+
+        # Return the summary
+        return summary
+
+    except Exception as e:
+        return f"Error generating summary: {e}"
+    
+def gpt_pattern_find(text, word_limit=200):
+    """Uses GPT-4 or GPT-3.5 to find patterns and themes in the text."""
+    try:
+        # Send the request to the OpenAI Chat API
+        response = client.chat.completions.create(
+            model="gpt-4",  # Or use "gpt-3.5-turbo"
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that summarizes text."},
+                {"role": "user", "content": f"Analyze the following text and identify any recurring themes or patterns that appear multiple times.:\n\n{text}"}
+            ],
+            max_tokens=word_limit * 4,  # Adjust tokens based on your word limit
+            temperature=0.7,
+        )
+
+        # Access the summary from the response using the new Pydantic model
+        summary = response.choices[0].message.content.strip()
+
+        # Return the summary
+        return summary
+
     except Exception as e:
         return f"Error generating summary: {e}"
 

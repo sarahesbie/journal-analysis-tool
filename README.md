@@ -124,3 +124,12 @@ Contributions are welcome! If you have any ideas or bug reports, feel free to op
 ## Author
 
 Sarah Brown - [@sarahesbie](https://github.com/sarahesbie)
+
+<!-- Notes to add
+- you need to add your openai key to environment variables if you want to use the gpt functionality -->
+
+<!-- heres' what I did
+
+- transcribed so many of my journals
+- chunked it and summarised it into 150 summaries with gpt
+- I got it down from 35,000 words to 12,000 words (this cost about $2.50) -->

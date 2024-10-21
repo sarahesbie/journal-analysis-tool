@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 from text_processing import split_document, extract_keyword_sections
-from summarization import summarize_sections, generate_recommendation, basic_summary, gpt_summary
+from summarization import summarize_sections, generate_recommendation, basic_summary, gpt_summary, gpt_pattern_find
 from utils import save_report_to_file, save_report_with_timestamp
 
 
@@ -108,37 +108,61 @@ def summarize_text_with_gpt():
         summary = gpt_summary(input_text, word_limit=150)  # Limit summary to 150 words
         result_display.delete(1.0, tk.END)
         result_display.insert(tk.END, summary)
+        
+def find_themes_with_gpt():
+    """Summarizes the entire document using GPT-4."""
+    input_text = text_display.get(1.0, tk.END).strip()
+    if input_text:
+        summary = gpt_pattern_find(input_text, word_limit=200)  # Limit summary to 150 words
+        result_display.delete(1.0, tk.END)
+        result_display.insert(tk.END, summary)
 
+import tkinter as tk
 
 # Tkinter setup
 root = tk.Tk()
 root.title("Journal Analysis Tool")
 root.geometry("800x600")
 
-# Create UI elements
-upload_button = tk.Button(root, text="Upload Text File", command=upload_file)
-upload_button.pack(pady=10)
+# Pastel color palette (ice cream-like colors)
+colors = ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF", "#FFCCFF", "#D4BAFF"]
+
+# Create a frame to hold the buttons inline
+button_frame = tk.Frame(root)
+button_frame.pack(pady=10)
+
+# Upload button
+upload_button = tk.Button(button_frame, text="Upload Text File", command=upload_file, bg=colors[0])
+upload_button.pack(side="left", padx=5)
 
 # Button for summarizing the entire text
-summarize_button = tk.Button(root, text="Summarize Text (150 words)", command=summarize_text)
-summarize_button.pack(pady=10)
+summarize_button = tk.Button(button_frame, text="Summarize Text (150 words)", command=summarize_text, bg=colors[1])
+summarize_button.pack(side="left", padx=5)
 
 # Button for summarizing the entire text using GPT
-summarize_gpt_button = tk.Button(root, text="Summarize Text (GPT, 150 words)", command=summarize_text_with_gpt)
-summarize_gpt_button.pack(pady=10)
+summarize_gpt_button = tk.Button(button_frame, text="Summarize Text (GPT, 150 words)", command=summarize_text_with_gpt, bg=colors[2])
+summarize_gpt_button.pack(side="left", padx=5)
 
+# Button for summarizing the entire text using GPT
+find_patterns_gpt_button = tk.Button(button_frame, text="Find Patterns (GPT, 200 words)", command=find_themes_with_gpt, bg=colors[1])
+find_patterns_gpt_button.pack(side="left", padx=5)
 
-# Buttons for predefined questions
-for question in questions_and_keywords:
-    button = tk.Button(root, text=question, command=lambda q=question: question_based_summarization(q))
-    button.pack(pady=5)
+# Predefined questions buttons
+for i, question in enumerate(questions_and_keywords):
+    button = tk.Button(button_frame, text=question, command=lambda q=question: question_based_summarization(q), bg=colors[(i + 3) % len(colors)])
+    button.pack(side="left", padx=5)
 
-# Buttons for saving the report
-save_new_button = tk.Button(root, text="Save Report to New File", command=lambda: save_report('new'))
-save_new_button.pack(pady=5)
+# Create another frame for save buttons (also inline)
+save_frame = tk.Frame(root)
+save_frame.pack(pady=10)
 
-append_button = tk.Button(root, text="Append Report to Existing File", command=lambda: save_report('append'))
-append_button.pack(pady=5)
+# Button for saving the report to a new file
+save_new_button = tk.Button(save_frame, text="Save Report to New File", command=lambda: save_report('new'), bg=colors[4])
+save_new_button.pack(side="left", padx=5)
+
+# Button for appending the report to an existing file
+append_button = tk.Button(save_frame, text="Append Report to Existing File", command=lambda: save_report('append'), bg=colors[5])
+append_button.pack(side="left", padx=5)
 
 # Text display and result display
 text_display = tk.Text(root, height=10, width=100)
