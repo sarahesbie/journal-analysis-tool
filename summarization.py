@@ -1,6 +1,8 @@
 from transformers import pipeline, AutoTokenizer
 import openai
 
+openai.api_key = 'your-openai-api-key'
+
 # Initialize the summarizer and tokenizer with specific model and revision
 summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", revision="a4f8f3e")
 tokenizer = AutoTokenizer.from_pretrained("sshleifer/distilbart-cnn-12-6")
